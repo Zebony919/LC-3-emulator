@@ -31,5 +31,6 @@ void op_add(uint16_t instruction);
 void op_and(uint16_t instruction);
 void op_not(uint16_t instruction);
 void op_br(uint16_t instruction);
+void op_jmp(uint16_t instruction);
 
 #endif

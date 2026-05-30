@@ -69,3 +69,8 @@ void op_br(uint16_t instruction) {
         registers[R_PC] += pc_offset;
     }
 }
+
+void op_jmp(uint16_t instruction) {
+    uint16_t base_register = (instruction >> 6) & 0x7;
+    registers[R_PC] = registers[base_register];
+}

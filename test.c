@@ -50,4 +50,15 @@ int main() {
     } else {
         printf("BR Test: Fail (PC: 0x%x)\n", registers[R_PC]);
     }
+
+    // JMP test
+    registers[R_PC] = 0x3000;
+    registers[R_R1] = 0x3005;
+    op_jmp(0b1100000001000000);
+
+    if (registers[R_PC] == 0x3005) {
+        printf("JMP Test: Pass (PC: 0x%x)\n", registers[R_PC]);
+    } else {
+        printf("JMP Test: Fail (PC: 0x%x)\n", registers[R_PC]);
+    }
 }
