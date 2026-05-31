@@ -167,4 +167,33 @@ int main() {
     } else {
         printf("STR Test: Fail (Memory[0x3005]: %d)\n", memory[0x3005]);
     }
+
+    // TRAP/GETC test
+    // op_trap(0b1111000000100000);
+    // printf("GETC Test: Char recieved '%c'", registers[R_R0]);
+
+    // TRAP/OUT test
+    registers[R_R0] = 'A';
+    op_trap(0b1111000000100001);
+
+    // TRAP/PUTS test
+    memory[0x3000] = 'H';
+    memory[0x3001] = 'e';
+    memory[0x3002] = 'l';
+    memory[0x3003] = 'l';
+    memory[0x3004] = 'o';
+    memory[0x3005] = 0;
+    registers[R_R0] = 0x3000;
+    op_trap(0b1111000000100010);
+
+    // TRAP/IN test
+    // op_trap(0b1111000000100011);
+
+    // TRAP/PUTSP test
+    memory[0x3000] = ('i' << 8) | 'H';
+    memory[0x3001] = 0;
+    op_trap(0b1111000000100100);
+
+    // TRAP/HALT test
+    op_trap(0b1111000000100101);
 }
