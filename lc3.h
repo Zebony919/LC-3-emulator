@@ -22,6 +22,32 @@ enum {
 };
 
 enum {
+    FL_POS = 1 << 0, 
+    FL_ZRO = 1 << 1, 
+    FL_NEG = 1 << 2
+};
+
+enum
+{
+    OP_BR = 0,
+    OP_ADD,   
+    OP_LD,    
+    OP_ST,    
+    OP_JSR,   
+    OP_AND,   
+    OP_LDR,   
+    OP_STR,   
+    OP_RTI,   
+    OP_NOT,   
+    OP_LDI,  
+    OP_STI,   
+    OP_JMP,  
+    OP_RES,    
+    OP_LEA,    
+    OP_TRAP    
+};
+
+enum {
   TRAP_GETC = 0X20, // Get character from keyboard, not echoed onto terminal
   TRAP_OUT = 0X21, // Output a character
   TRAP_PUTS = 0X22, // Output a word string

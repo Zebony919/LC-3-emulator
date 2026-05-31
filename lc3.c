@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-//int main() {
-//  printf("Hello World!");
-//}
-
 uint16_t sign_extend(uint16_t x, int bit_count) {
     if ((x >> bit_count - 1) & 1) { // Check the leftmost bit. Whether the number is positive/negative
         x |= (0xFFFF << bit_count); // Define a 16-bit binary number with 16 - bit_count amount of 1's and bit_count 0's and OR with x
