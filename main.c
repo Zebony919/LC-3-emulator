@@ -3,14 +3,20 @@
 #include <stdint.h>
 
 int main(int argc, char *argv[]) {
-    registers[R_COND] = FL_ZRO;
 
+    memory[0x3000] = 0b0001001010000011;
+    memory[0x3001] = 0b1111000000100101;
+
+    registers[R_R1] = 0;
+    registers[R_R2] = 5;
+    registers[R_R3] = 3;
+
+    registers[R_COND] = FL_ZRO;
     enum { PC_START = 0x3000 };
     registers[R_PC] = PC_START;
 
-    int running = 1;
     while (running) {
-        uint16_t instruction = mem_read(registers[R_PC]++);
+        uint16_t instruction = memory[registers[R_PC]++];
         uint16_t op_code = instruction >> 12;
 
         switch (op_code)
@@ -64,6 +70,4 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-
-    restore_input_buffering();
 }

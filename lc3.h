@@ -3,6 +3,7 @@
 #define MEMORY_MAX (1 << 16)
 
 #include <stdint.h>
+#include <stdio.h>
 
 // Hardware/Operating System
 uint16_t  memory[MEMORY_MAX];
@@ -19,6 +20,12 @@ enum {
   R_PC,
   R_COND,
   R_COUNT
+};
+
+enum
+{
+    MR_KBSR = 0xFE00, /* keyboard status */
+    MR_KBDR = 0xFE02  /* keyboard data */
 };
 
 enum {
@@ -56,6 +63,7 @@ enum {
   TRAP_HALT = 0X25 // Halt the program
 };
 
+extern int running;
 uint16_t registers[R_COUNT];
 extern uint16_t registers[];
 
