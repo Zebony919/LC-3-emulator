@@ -52,10 +52,16 @@ int main(int argc, char *argv[]) {
     enum { PC_START = 0x3000 };
     registers[R_PC] = PC_START;
 
+    memory[0x0001] = 'H';
+    memory[0x0002] = 'E';
+    memory[0x0003] = 'L';
+    memory[0x0004] = 'L';
+    memory[0x0005] = 'O';
+    memory[0x0006] = '\0';
+
     while (running) {
         uint16_t instruction = mem_read(registers[R_PC]++);
         uint16_t op_code = instruction >> 12;
-        printf("PC: 0x%x, opcode: 0x%x\n", registers[R_PC]-1, op_code);
 
         switch (op_code)
         {

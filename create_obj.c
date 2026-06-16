@@ -13,8 +13,8 @@ int main() {
 
     uint16_t instructions[] = {
         swap16(0b0101000000100000),  // AND R0, R0, #0
-        swap16(0b0101001001100000),  // AND R1, R1, #0
         swap16(0b0001000000100001),  // ADD R0, R0, #1
+        swap16(0b1111000000100010),  // TRAP PUTS
         swap16(0b1111000000100101),  // HALT
     };
 

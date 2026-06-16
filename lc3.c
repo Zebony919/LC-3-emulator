@@ -53,12 +53,11 @@ int read_image(const char *image_path) {
 uint16_t mem_read(uint16_t address) {
     if (address == MR_KBSR) {
         if (check_key()) {
-            memory[MR_KBSR] = (1 << 15);  // set ready bit only
+            memory[MR_KBSR] = (1 << 15);
+            memory[MR_KBDR] = getchar();  
         } else {
             memory[MR_KBSR] = 0;
         }
-    } else if (address == MR_KBDR) {
-        memory[MR_KBDR] = getchar();  // read character here instead
     }
     return memory[address];
 }
@@ -226,13 +225,11 @@ void op_trap(uint16_t instruction) {
 
 // Trap instructions
 void trap_getc() {
-    printf("Enter a character: ");
-    registers[R_R0] = (uint16_t) getchar();     
+    registers[R_R0] = memory[MR_KBDR];     
     update_flags(R_R0);
 }
 
 void trap_out() {
-    printf("Outputted Character: ");
     putc((char) registers[R_R0], stdout);
     printf("\n");
     fflush(stdout);
@@ -241,7 +238,6 @@ void trap_out() {
 void trap_puts() {
     uint16_t *c = memory + registers[R_R0];
 
-    printf("Outputted String: ");
     while (*c) {
         putc((char) *c, stdout);
         c++;
@@ -251,17 +247,14 @@ void trap_puts() {
 };
 
 void trap_in() {
-    printf("Enter a character: ");
-    char c = getchar();
-    putc(c, stdout);
-    registers[R_R0] = (uint16_t) c;
+    registers[R_R0] = memory[MR_KBDR];
+    putc((char)registers[R_R0], stdout);
     update_flags(R_R0);
-};
+}
 
 void trap_putsp() {
     uint16_t *c = memory + registers[R_R0];
 
-    printf("Outputted String: ");
     while (*c) {
         char char1 = (*c) & 0xFF;
         putc(char1, stdout);
