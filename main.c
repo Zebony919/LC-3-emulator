@@ -4,12 +4,10 @@
 
 int main(int argc, char *argv[]) {
 
-    memory[0x3000] = 0b0001001010000011;
-    memory[0x3001] = 0b1111000000100101;
-
-    registers[R_R1] = 0;
-    registers[R_R2] = 5;
-    registers[R_R3] = 3;
+    if (!read_image(argv[1])) {
+        printf("Failed to load image at: %s", argv[1]);
+        exit(1);
+    }
 
     registers[R_COND] = FL_ZRO;
     enum { PC_START = 0x3000 };

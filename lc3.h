@@ -8,6 +8,7 @@
 // Hardware/Operating System
 uint16_t  memory[MEMORY_MAX];
 
+// Registers
 enum {
   R_R0 = 0,
   R_R1,
@@ -22,18 +23,21 @@ enum {
   R_COUNT
 };
 
+// Keyboard input flags
 enum
 {
     MR_KBSR = 0xFE00, /* keyboard status */
     MR_KBDR = 0xFE02  /* keyboard data */
 };
 
+// Conditional flags
 enum {
     FL_POS = 1 << 0, 
     FL_ZRO = 1 << 1, 
     FL_NEG = 1 << 2
 };
 
+// Op codes
 enum
 {
     OP_BR = 0,
@@ -54,6 +58,7 @@ enum
     OP_TRAP    
 };
 
+// Trap Vector
 enum {
   TRAP_GETC = 0X20, // Get character from keyboard, not echoed onto terminal
   TRAP_OUT = 0X21, // Output a character
@@ -70,6 +75,10 @@ extern uint16_t registers[];
 // Instructions/methods
 uint16_t sign_extend(uint16_t x, int bit_count);
 void update_flags(uint16_t instruction);
+
+uint16_t swap16(uint16_t x);
+void read_image_file(FILE *file);
+int read_image(const char *image_path);
 
 void op_add(uint16_t instruction);
 void op_and(uint16_t instruction);
