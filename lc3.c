@@ -50,6 +50,19 @@ int read_image(const char *image_path) {
     return 1;
 }
 
+uint16_t mem_read(uint16_t address) {
+    if (address == MR_KBSR) {
+        if (check_key()) {
+            memory[MR_KBSR] = (1 << 15);  // set ready bit only
+        } else {
+            memory[MR_KBSR] = 0;
+        }
+    } else if (address == MR_KBDR) {
+        memory[MR_KBDR] = getchar();  // read character here instead
+    }
+    return memory[address];
+}
+
 // Instructions
 char *reg_names[] = {"R_R0", "R_R1", "R_R2", "R_R3", "R_R4", "R_R5", "R_R6", "R_R7"};
 
@@ -61,18 +74,18 @@ void op_add(uint16_t instruction) {
     if (immediateFlag) {
         uint16_t immediate_value = sign_extend((instruction & 0x1F), 5);
         registers[destination] = registers[source_register_one] + immediate_value;
-        printf("ADD %s=(%d), %s=(%d), %d\n", reg_names[destination], registers[destination], 
-                                             reg_names[source_register_one], registers[source_register_one], 
-                                             immediate_value);
+        // printf("ADD %s=(%d), %s=(%d), %d\n", reg_names[destination], registers[destination], 
+        //                                     reg_names[source_register_one], registers[source_register_one], 
+        //                                     immediate_value);
     } else {
         uint16_t source_register_two = instruction & 0x7;
         registers[destination] = registers[source_register_one] + registers[source_register_two];
-        printf("ADD %s=(%d), %s=(%d), %s=(%d)\n", reg_names[destination], registers[destination], 
-                                                  reg_names[source_register_one], registers[source_register_one], 
-                                                  reg_names[source_register_two], registers[source_register_two]);
+        //printf("ADD %s=(%d), %s=(%d), %s=(%d)\n", reg_names[destination], registers[destination], 
+        //                                          reg_names[source_register_one], registers[source_register_one], 
+        //                                          reg_names[source_register_two], registers[source_register_two]);
     }
 
-    printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
 }
 
 void op_and(uint16_t instruction) {
@@ -83,18 +96,18 @@ void op_and(uint16_t instruction) {
     if (immediateFlag) {
         uint16_t immediate_value = sign_extend((instruction & 0x1F), 5);
         registers[destination] = registers[source_register_one] & immediate_value;
-        printf("AND %s=(%d), %s=(%d), %d\n", reg_names[destination], registers[destination], 
-                                             reg_names[source_register_one], registers[source_register_one], 
-                                             immediate_value);
+        //printf("AND %s=(%d), %s=(%d), %d\n", reg_names[destination], registers[destination], 
+        //                                     reg_names[source_register_one], registers[source_register_one], 
+        //                                     immediate_value);
     } else {
         uint16_t source_register_two = instruction & 0x7;
         registers[destination] = registers[source_register_one] & registers[source_register_two];
-        printf("AND %s=(%d), %s=(%d), %s=(%d)\n", reg_names[destination], registers[destination], 
-                                                  reg_names[source_register_one], registers[source_register_one], 
-                                                  reg_names[source_register_two], registers[source_register_two]);
+        //printf("AND %s=(%d), %s=(%d), %s=(%d)\n", reg_names[destination], registers[destination], 
+        //                                          reg_names[source_register_one], registers[source_register_one], 
+        //                                          reg_names[source_register_two], registers[source_register_two]);
     }
 
-    printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
 }
 
 void op_not(uint16_t instruction) {
@@ -102,8 +115,8 @@ void op_not(uint16_t instruction) {
     uint16_t source_register_one = (instruction >> 6) & 0x7;
 
     registers[destination] = ~(registers[source_register_one]);
-    printf("NOT %s=(%d)\n", registers[destination]);
-    printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    //printf("NOT %s=(%d)\n", reg_names[destination], registers[destination]);
+    //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
 }
 
 void op_br(uint16_t instruction) {
@@ -180,8 +193,9 @@ void op_str(uint16_t instruction) {
     uint16_t source_register = (instruction >> 9) & 0x7;
     uint16_t base_register = (instruction >> 6) & 0x7;
     uint16_t offset = sign_extend((instruction & 0x3F), 6);
+    uint16_t address = (uint16_t)(registers[base_register] + offset);
 
-    memory[registers[base_register] + offset] = registers[source_register];
+    memory[address] = registers[source_register];
 }
 
 void op_trap(uint16_t instruction) {

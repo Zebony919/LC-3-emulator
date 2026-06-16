@@ -1,8 +1,47 @@
 #include "lc3.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <signal.h>
+/* windows only */
+#include <Windows.h>
+#include <conio.h>  // _kbhit
+
+HANDLE hStdin = INVALID_HANDLE_VALUE;
+DWORD fdwMode, fdwOldMode;
+
+void disable_input_buffering() {
+    hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    GetConsoleMode(hStdin, &fdwOldMode); /* save old mode */
+    fdwMode = fdwOldMode
+            ^ ENABLE_ECHO_INPUT  /* no input echo */
+            ^ ENABLE_LINE_INPUT; /* return when one or
+                                    more characters are available */
+    SetConsoleMode(hStdin, fdwMode); /* set new mode */
+    FlushConsoleInputBuffer(hStdin); /* clear buffer */
+}
+
+void restore_input_buffering() {
+    SetConsoleMode(hStdin, fdwOldMode);
+}
+
+uint16_t check_key() {
+    return WaitForSingleObject(hStdin, 1000) == WAIT_OBJECT_0 && _kbhit();
+}
+
+void handle_interrupt(int signal) {
+    restore_input_buffering();
+    printf("\n");
+    exit(-2);
+}
 
 int main(int argc, char *argv[]) {
+    signal(SIGINT, handle_interrupt);
+    disable_input_buffering();
+
+    if (argc < 2) {
+        printf("Usage: lc3.exe [image-file]\n");
+        exit(2);
+    }
 
     if (!read_image(argv[1])) {
         printf("Failed to load image at: %s", argv[1]);
@@ -14,8 +53,9 @@ int main(int argc, char *argv[]) {
     registers[R_PC] = PC_START;
 
     while (running) {
-        uint16_t instruction = memory[registers[R_PC]++];
+        uint16_t instruction = mem_read(registers[R_PC]++);
         uint16_t op_code = instruction >> 12;
+        printf("PC: 0x%x, opcode: 0x%x\n", registers[R_PC]-1, op_code);
 
         switch (op_code)
         {
@@ -68,4 +108,6 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
+
+    restore_input_buffering();
 }
