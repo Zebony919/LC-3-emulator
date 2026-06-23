@@ -8,9 +8,6 @@
 
 extern HANDLE hStdin;
 
-// Hardware/Operating System
-uint16_t  memory[MEMORY_MAX];
-
 // Registers
 enum {
   R_R0 = 0,
@@ -25,6 +22,10 @@ enum {
   R_COND,
   R_COUNT
 };
+
+// Hardware/Operating System
+extern uint16_t memory[MEMORY_MAX];
+extern uint16_t registers[R_COUNT];
 
 // Keyboard input flags
 enum
@@ -72,8 +73,6 @@ enum {
 };
 
 extern int running;
-uint16_t registers[R_COUNT];
-extern uint16_t registers[];
 
 // Instructions/methods
 uint16_t sign_extend(uint16_t x, int bit_count);

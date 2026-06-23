@@ -3,6 +3,8 @@
 #include <stdint.h>
 
 int running = 1;
+uint16_t memory[MEMORY_MAX];
+uint16_t registers[R_COUNT];
 
 // Special Functions
 uint16_t sign_extend(uint16_t x, int bit_count) {
@@ -55,6 +57,7 @@ uint16_t mem_read(uint16_t address) {
         if (check_key()) {
             memory[MR_KBSR] = (1 << 15);
             memory[MR_KBDR] = getchar();  
+            fprintf(stderr, "[debug] got key: %d ('%c')\n", memory[MR_KBDR], (char)memory[MR_KBDR]);
         } else {
             memory[MR_KBSR] = 0;
         }
@@ -85,6 +88,7 @@ void op_add(uint16_t instruction) {
     }
 
     //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    update_flags(destination);
 }
 
 void op_and(uint16_t instruction) {
@@ -107,6 +111,7 @@ void op_and(uint16_t instruction) {
     }
 
     //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    update_flags(destination);
 }
 
 void op_not(uint16_t instruction) {
@@ -116,11 +121,12 @@ void op_not(uint16_t instruction) {
     registers[destination] = ~(registers[source_register_one]);
     //printf("NOT %s=(%d)\n", reg_names[destination], registers[destination]);
     //printf("Destination Register (%s) now equals %d\n\n", reg_names[destination], registers[destination]);
+    update_flags(destination);
 }
 
 void op_br(uint16_t instruction) {
     uint16_t conditions = (instruction >> 9) & 0x7;
-    uint16_t pc_offset = instruction & 0x1FF;
+    uint16_t pc_offset = sign_extend(instruction & 0x1FF, 9);
 
     if (conditions & registers[R_COND]) {
         registers[R_PC] += pc_offset;
@@ -141,7 +147,7 @@ void op_jsr(uint16_t instruction) {
         registers[R_PC]  += pc_offset;
     } else {
         uint16_t base_register = (instruction >> 6) & 0x7;
-        registers[R_PC]  += registers[base_register];
+        registers[R_PC]  = registers[base_register];
     }
 }
 
@@ -150,13 +156,15 @@ void op_ld(uint16_t instruction) {
     uint16_t pc_offset = sign_extend((instruction & 0x1FF), 9);
 
     registers[destination] = memory[registers[R_PC] + pc_offset];
+    update_flags(destination);
 }
 
 void op_ldi(uint16_t instruction) {
     uint16_t destination = (instruction >> 9) & 0x7;
     uint16_t pc_offset = sign_extend((instruction & 0x1FF), 9);
 
-    registers[destination] = memory[memory[registers[R_PC] + pc_offset]];
+    registers[destination] = mem_read(mem_read(registers[R_PC] + pc_offset));
+    update_flags(destination);
 }
 
 void op_ldr(uint16_t instruction) {
@@ -165,6 +173,7 @@ void op_ldr(uint16_t instruction) {
     uint16_t offset = sign_extend((instruction & 0x3F), 6);
 
     registers[destination] = memory[registers[base_register] + offset];
+    update_flags(destination);
 }
 
 void op_lea(uint16_t instruction) {
@@ -172,6 +181,7 @@ void op_lea(uint16_t instruction) {
     uint16_t pc_offset = sign_extend((instruction & 0x1FF), 9);
 
     registers[destination] = registers[R_PC] + pc_offset;
+    update_flags(destination);
 }
 
 void op_st(uint16_t instruction) {
@@ -225,13 +235,12 @@ void op_trap(uint16_t instruction) {
 
 // Trap instructions
 void trap_getc() {
-    registers[R_R0] = memory[MR_KBDR];     
+    registers[R_R0] = (int)getchar();     
     update_flags(R_R0);
 }
 
 void trap_out() {
     putc((char) registers[R_R0], stdout);
-    printf("\n");
     fflush(stdout);
 };
 
@@ -242,13 +251,15 @@ void trap_puts() {
         putc((char) *c, stdout);
         c++;
     }
-    printf("\n");
     fflush(stdout);
 };
 
 void trap_in() {
-    registers[R_R0] = memory[MR_KBDR];
-    putc((char)registers[R_R0], stdout);
+    printf("Enter a character: ");
+    char c = getchar();
+    putc(c, stdout);
+    fflush(stdout);
+    registers[R_R0] = (uint16_t)c;
     update_flags(R_R0);
 }
 
@@ -262,7 +273,6 @@ void trap_putsp() {
         if (char2) putc(char2, stdout);
         c++;
     }
-    printf("\n");
     fflush(stdout);
 };
 

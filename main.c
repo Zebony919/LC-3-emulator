@@ -51,13 +51,7 @@ int main(int argc, char *argv[]) {
     registers[R_COND] = FL_ZRO;
     enum { PC_START = 0x3000 };
     registers[R_PC] = PC_START;
-
-    memory[0x0001] = 'H';
-    memory[0x0002] = 'E';
-    memory[0x0003] = 'L';
-    memory[0x0004] = 'L';
-    memory[0x0005] = 'O';
-    memory[0x0006] = '\0';
+    fprintf(stderr, "[debug] PC reset to 0x3000\n");
 
     while (running) {
         uint16_t instruction = mem_read(registers[R_PC]++);
